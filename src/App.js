@@ -2,52 +2,76 @@ import React, { useState } from 'react';
 import { HeaderUMG } from './components/HeaderUMG';
 import { PedidoSucursal } from './components/PedidoSucursal';
 import { PanelProduccion } from './components/PanelProduccion';
+import { GestionInventario } from './components/GestionInventario';
+import { GestionRecetas } from './components/GestionRecetas';
 
 function App() {
-  const [vista, setVista] = useState('sucursal'); // 'sucursal' o 'admin'
+  const [vista, setVista] = useState('sucursal'); // 'sucursal', 'inventario', 'recetas', 'admin'
+
+  const titulosHeader = {
+    sucursal: 'PORTAL SUCURSALES (PEDIDOS)',
+    inventario: 'GESTIÓN DE STOCK & PROVEEDORES',
+    recetas: 'ADMINISTRACIÓN DE RECETAS',
+    admin: 'PANEL DE CONTROL DE PRODUCCIÓN'
+  };
 
   return (
     <div style={{ backgroundColor: '#f1f5f9', minHeight: '100vh', paddingBottom: '3rem' }}>
-      <HeaderUMG sucursalActual={vista === 'sucursal' ? 'PORTAL SUCURSALES' : 'ADMINISTRACIÓN / FÁBRICA'} />
+      <HeaderUMG sucursalActual={titulosHeader[vista]} />
 
-      {/* Navegación por pestañas */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '2rem' }}>
+      {/* Menú Modular */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
         <button
           onClick={() => setVista('sucursal')}
-          style={{
-            padding: '0.7rem 1.5rem',
-            borderRadius: '8px',
-            border: 'none',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            backgroundColor: vista === 'sucursal' ? '#0284c7' : '#e2e8f0',
-            color: vista === 'sucursal' ? '#ffffff' : '#334155'
-          }}
+          style={styles.navBtn(vista === 'sucursal')}
         >
-          Portal Sucursales (Tomar Pedido)
+          1. Pedidos Sucursales
+        </button>
+
+        <button
+          onClick={() => setVista('inventario')}
+          style={styles.navBtn(vista === 'inventario')}
+        >
+          2. Compras & Proveedores (Stock)
+        </button>
+
+        <button
+          onClick={() => setVista('recetas')}
+          style={styles.navBtn(vista === 'recetas')}
+        >
+          3. Recetas por Pan
         </button>
 
         <button
           onClick={() => setVista('admin')}
-          style={{
-            padding: '0.7rem 1.5rem',
-            borderRadius: '8px',
-            border: 'none',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            backgroundColor: vista === 'admin' ? '#0284c7' : '#e2e8f0',
-            color: vista === 'admin' ? '#ffffff' : '#334155'
-          }}
+          style={styles.navBtn(vista === 'admin')}
         >
-          Panel Producción / Sr. Kevin
+          4. Panel Producción (Sr. Kevin)
         </button>
       </div>
 
       <main style={{ padding: '0 1rem' }}>
-        {vista === 'sucursal' ? <PedidoSucursal /> : <PanelProduccion />}
+        {vista === 'sucursal' && <PedidoSucursal />}
+        {vista === 'inventario' && <GestionInventario />}
+        {vista === 'recetas' && <GestionRecetas />}
+        {vista === 'admin' && <PanelProduccion />}
       </main>
     </div>
   );
 }
+
+const styles = {
+  navBtn: (activo) => ({
+    padding: '0.7rem 1.2rem',
+    borderRadius: '8px',
+    border: 'none',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    backgroundColor: activo ? '#0284c7' : '#ffffff',
+    color: activo ? '#ffffff' : '#334155',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+    transition: 'all 0.2s'
+  })
+};
 
 export default App;
