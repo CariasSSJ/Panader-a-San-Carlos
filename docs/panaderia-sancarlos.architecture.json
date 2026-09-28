@@ -1,0 +1,243 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Panadería San Carlos — Arquitectura src",
+    "quality_profile": "showcase",
+    "viewBox": [980, 640]
+  },
+  "components": [
+    {
+      "id": "usuarios",
+      "type": "external",
+      "label": "Usuarios",
+      "sublabel": "Sucursales y gerencia",
+      "pos": [40, 400],
+      "size": [120, 60]
+    },
+    {
+      "id": "react-entry",
+      "type": "frontend",
+      "label": "Entrada React",
+      "sublabel": "src/index.js",
+      "pos": [200, 400],
+      "size": [130, 60]
+    },
+    {
+      "id": "app-shell",
+      "type": "frontend",
+      "label": "App.js",
+      "sublabel": "Navegación y sesión",
+      "pos": [380, 400],
+      "size": [140, 60]
+    },
+    {
+      "id": "modulos-ui",
+      "type": "frontend",
+      "label": "Módulos UI",
+      "sublabel": "Pedidos · stock · recetas…",
+      "pos": [560, 400],
+      "size": [160, 64],
+      "tag": "7 vistas"
+    },
+    {
+      "id": "factura-util",
+      "type": "frontend",
+      "label": "facturaPdf",
+      "sublabel": "jsPDF en cliente",
+      "pos": [760, 400],
+      "size": [140, 60]
+    },
+    {
+      "id": "auth-service",
+      "type": "backend",
+      "label": "authService",
+      "sublabel": "Firebase Auth SDK",
+      "pos": [240, 230],
+      "size": [140, 58]
+    },
+    {
+      "id": "pedidos-service",
+      "type": "backend",
+      "label": "pedidosService",
+      "sublabel": "Colección pedidos",
+      "pos": [400, 230],
+      "size": [148, 58]
+    },
+    {
+      "id": "recetas-service",
+      "type": "backend",
+      "label": "recetasService",
+      "sublabel": "Insumos y recetas",
+      "pos": [560, 230],
+      "size": [148, 58]
+    },
+    {
+      "id": "escalabilidad-service",
+      "type": "backend",
+      "label": "scriptEscalabilidad",
+      "sublabel": "Agregados de ventas",
+      "pos": [720, 230],
+      "size": [160, 58]
+    },
+    {
+      "id": "firebase-config",
+      "type": "backend",
+      "label": "firebase.js",
+      "sublabel": "Inicialización SDK",
+      "pos": [400, 120],
+      "size": [148, 58]
+    },
+    {
+      "id": "firebase-auth",
+      "type": "security",
+      "label": "Firebase Auth",
+      "sublabel": "panaderia-san-carlos",
+      "pos": [620, 36],
+      "size": [148, 58],
+      "brand": "firebase"
+    },
+    {
+      "id": "firestore",
+      "type": "database",
+      "label": "Cloud Firestore",
+      "sublabel": "pedidos · insumos · recetas",
+      "pos": [200, 36],
+      "size": [160, 58],
+      "brand": "firebase"
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Cliente React (src/)",
+      "wraps": ["react-entry", "app-shell", "modulos-ui", "factura-util"]
+    },
+    {
+      "kind": "region",
+      "label": "Servicios (src/services + config)",
+      "wraps": ["auth-service", "pedidos-service", "recetas-service", "escalabilidad-service", "firebase-config"]
+    },
+    {
+      "kind": "region",
+      "label": "Firebase — panaderia-san-carlos",
+      "wraps": ["firebase-auth", "firestore"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "users-spa",
+      "from": "usuarios",
+      "to": "react-entry",
+      "variant": "emphasis"
+    },
+    {
+      "id": "bootstrap-app",
+      "from": "react-entry",
+      "to": "app-shell"
+    },
+    {
+      "id": "shell-vistas",
+      "from": "app-shell",
+      "to": "modulos-ui"
+    },
+    {
+      "id": "shell-auth",
+      "from": "app-shell",
+      "to": "auth-service",
+      "label": "observarUsuario",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "ui-pedidos",
+      "from": "modulos-ui",
+      "to": "pedidos-service",
+      "label": "CRUD pedidos",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "labelDy": 28
+    },
+    {
+      "id": "ui-recetas",
+      "from": "modulos-ui",
+      "to": "recetas-service",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "ui-escala",
+      "from": "modulos-ui",
+      "to": "escalabilidad-service",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "ui-pdf",
+      "from": "modulos-ui",
+      "to": "factura-util",
+      "variant": "dashed"
+    },
+    {
+      "id": "auth-config",
+      "from": "auth-service",
+      "to": "firebase-config",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "pedidos-config",
+      "from": "pedidos-service",
+      "to": "firebase-config",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "recetas-config",
+      "from": "recetas-service",
+      "to": "firebase-config",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "escala-config",
+      "from": "escalabilidad-service",
+      "to": "firebase-config",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "config-db",
+      "from": "firebase-config",
+      "to": "firestore",
+      "label": "getFirestore",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "config-auth",
+      "from": "firebase-config",
+      "to": "firebase-auth",
+      "label": "getAuth",
+      "fromSide": "top",
+      "toSide": "bottom"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Flujo principal",
+      "items": [
+        "SPA React: App.js enruta módulos; servicios encapsulan Firestore y Auth"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Gerencia",
+      "items": [
+        "authService protege revisión y producción; HistorialReportes lee Firestore directo"
+      ]
+    }
+  ]
+}

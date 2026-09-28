@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagrama de Arquitectura - Panadería San Carlos FF</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            padding: 2rem 4rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            max-width: 1400px;
+            width: 100%;
+            overflow-x: auto;
+        }
+        h1 {
+            color: #0f172a;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 1rem;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+        .footer {
+            margin-top: 2rem;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+    </style>
+    <!-- Importamos Mermaid.js desde CDN para renderizar el diagrama en el HTML -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'default',
+            flowchart: { curve: 'basis' }
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Arquitectura: Panadería San Carlos FF</h1>
+        
+        <div class="mermaid">
+            flowchart TD
+                classDef react fill:#61dafb,stroke:#333,stroke-width:2px,color:#000;
+                classDef service fill:#f9a826,stroke:#333,stroke-width:2px,color:#000;
+                classDef firebase fill:#ffca28,stroke:#333,stroke-width:2px,color:#000;
+                classDef component fill:#ffffff,stroke:#333,stroke-width:1px,color:#000;
+
+                subgraph Frontend ["Frontend (React)"]
+                    App["App.js (Enrutador y Estado Global)"]:::react
+                    
+                    subgraph Vistas ["Módulos Principales (Vistas)"]
+                        PedidoSucursal["Pedido Sucursal"]:::component
+                        GestionInventario["Gestión Inventario"]:::component
+                        GestionRecetas["Gestión Recetas"]:::component
+                        RevisionPedidos["Revisión Pedidos (Gerencia)"]:::component
+                        PanelProduccion["Panel Producción (Gerencia)"]:::component
+                        HistorialReportes["Historial y Reportes"]:::component
+                        Escalabilidad["Módulo Escalabilidad"]:::component
+                    end
+
+                    subgraph UI ["Componentes de Interfaz (UI Compartida)"]
+                        HeaderUMG["Header UMG"]:::component
+                        LoginModal["Login Modal"]:::component
+                        EstadoBadge["Estado Badge"]:::component
+                        ModalDialog["Modal Dialog"]:::component
+                    end
+                end
+
+                subgraph Services ["Capa de Servicios (Lógica y Conexión)"]
+                    authService["authService.js"]:::service
+                    pedidosService["pedidosService.js"]:::service
+                    recetasService["recetasService.js"]:::service
+                    scriptEscalabilidad["scriptEscalabilidad.js"]:::service
+                end
+
+                subgraph Backend ["Backend (Firebase BaaS)"]
+                    FirebaseConfig["config/firebase.js"]:::firebase
+                    FirebaseAuth[("Firebase Auth")]:::firebase
+                    FirebaseFirestore[("Firebase Firestore (DB)")]:::firebase
+                end
+
+                %% Relaciones de Frontend
+                App --> Vistas
+                App --> UI
+                App --> authService
+
+                %% Relaciones de los Módulos a Servicios
+                PedidoSucursal --> pedidosService
+                RevisionPedidos --> pedidosService
+                PanelProduccion --> pedidosService
+                HistorialReportes --> pedidosService
+                
+                GestionRecetas --> recetasService
+                GestionInventario --> recetasService
+                Escalabilidad --> scriptEscalabilidad
+
+                %% Relaciones de Autenticación
+                LoginModal --> authService
+
+                %% Relaciones hacia el Backend
+                authService --> FirebaseConfig
+                pedidosService --> FirebaseConfig
+                recetasService --> FirebaseConfig
+                scriptEscalabilidad --> FirebaseConfig
+
+                FirebaseConfig --> FirebaseAuth
+                FirebaseConfig --> FirebaseFirestore
+        </div>
+
+        <div class="footer">
+            Diagrama generado localmente. Abre este archivo en cualquier navegador moderno.
+        </div>
+    </div>
+</body>
+</html>
