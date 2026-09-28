@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { actualizarPedido, aprobarPedido, eliminarPedido } from "../services/pedidosService";
