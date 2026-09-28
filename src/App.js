@@ -6,6 +6,7 @@ import { PanelProduccion } from './components/PanelProduccion';
 import { GestionInventario } from './components/GestionInventario';
 import { GestionRecetas } from './components/GestionRecetas';
 import { LoginModal } from './components/LoginModal';
+import { LoginEmpleado } from './components/LoginEmpleado';
 import { observarUsuario, cerrarSesion } from './services/authService';
 import { HistorialReportes } from './components/HistorialReportes';
 import { Escalabilidad } from './components/escalabilidad';
@@ -14,19 +15,23 @@ import { BarChart3, ClipboardList, Factory, LockKeyhole, LogIn, LogOut, Package,
 function App() {
   const [vista, setVista] = useState('sucursal'); // 'sucursal', 'inventario', 'recetas', 'revision', 'admin', 'historial', 'escalabilidad'
   const [usuario, setUsuario] = useState(null);
+  const [rolUsuario, setRolUsuario] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
   const [modalLoginOpen, setModalLoginOpen] = useState(false);
 
   // Escuchar estado de sesión de Firebase Auth
   useEffect(() => {
-    const desubscribir = observarUsuario((user) => {
-      setUsuario(user);
+    const desubscribir = observarUsuario((session) => {
+      setUsuario(session?.user ?? null);
+      setRolUsuario(session?.role ?? null);
+      setAuthReady(true);
     });
     return () => desubscribir();
   }, []);
 
   const handleSeleccionarVista = (nuevaVista) => {
-    // Si intenta ingresar a vistas protegidas y no ha iniciado sesión
-    if ((nuevaVista === 'admin' || nuevaVista === 'revision') && !usuario) {
+    // Solicitar credenciales gerenciales sin cambiar la vista actual.
+    if ((nuevaVista === 'admin' || nuevaVista === 'revision') && rolUsuario !== 'gerencia') {
       setModalLoginOpen(true);
       return;
     }
@@ -37,6 +42,26 @@ function App() {
     await cerrarSesion();
     setVista('sucursal');
   };
+
+  if (!authReady) {
+    return <div style={styles.loadingScreen} role="status">Verificando sesión...</div>;
+  }
+
+  if (!usuario) {
+    return (
+      <div style={styles.loginScreen}>
+        <LoginEmpleado />
+        <button onClick={() => setModalLoginOpen(true)} style={styles.managerLoginLink}>
+          Acceso Gerencial
+        </button>
+        <LoginModal
+          isOpen={modalLoginOpen}
+          onClose={() => setModalLoginOpen(false)}
+          onLoginExitoso={() => setVista('admin')}
+        />
+      </div>
+    );
+  }
 
   const titulosHeader = {
   sucursal: 'PORTAL SUCURSALES (PEDIDOS)',
@@ -60,7 +85,7 @@ function App() {
             <div style={styles.userBadge}>
               <span style={styles.userStatusDot} />
               <span style={styles.userEmail}>{usuario.email}</span>
-              <span style={styles.roleTag}>Gerencia</span>
+              <span style={styles.roleTag}>{rolUsuario === 'gerencia' ? 'Gerencia' : 'Empleado'}</span>
             </div>
             <button onClick={handleCerrarSesion} style={styles.btnLogout}>
               <LogOut size={15} /> Cerrar Sesión
@@ -138,24 +163,24 @@ function App() {
       {vista === 'inventario' && <GestionInventario />}
       {vista === 'recetas' && <GestionRecetas />}
       {vista === 'revision' && (
-        usuario ? (
+        rolUsuario === 'gerencia' ? (
           <RevisionPedidos />
         ) : (
           <div style={styles.blockedCard}>
             <div style={styles.blockedIcon}><LockKeyhole size={30} /></div>
             <h3 style={styles.blockedTitle}>Acceso Restringido</h3>
-            <p style={styles.blockedText}>Debe iniciar sesión con una cuenta de gerencia para acceder a este panel.</p>
+            <p style={styles.blockedText}>Esta sección requiere una cuenta autorizada de gerencia.</p>
           </div>
         )
       )}
       {vista === 'admin' && (
-        usuario ? (
+        rolUsuario === 'gerencia' ? (
           <PanelProduccion />
         ) : (
           <div style={styles.blockedCard}>
             <div style={styles.blockedIcon}><LockKeyhole size={30} /></div>
             <h3 style={styles.blockedTitle}>Acceso Restringido</h3>
-            <p style={styles.blockedText}>Debe iniciar sesión con una cuenta de gerencia para acceder a este panel.</p>
+            <p style={styles.blockedText}>Esta sección requiere una cuenta autorizada de gerencia.</p>
           </div>
         )
       )}
@@ -174,6 +199,33 @@ function App() {
 }
 
 const styles = {
+  loadingScreen: {
+    minHeight: '100vh',
+    display: 'grid',
+    placeItems: 'center',
+    color: '#475569',
+    backgroundColor: '#f8fafc',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+  },
+  loginScreen: {
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: '1rem',
+    padding: '1.5rem',
+    backgroundColor: '#f8fafc'
+  },
+  managerLoginLink: {
+    color: '#475569',
+    background: 'transparent',
+    border: 'none',
+    padding: '0.5rem 0.75rem',
+    fontSize: '0.875rem',
+    fontWeight: 600,
+    cursor: 'pointer'
+  },
   appContainer: {
     backgroundColor: '#f8fafc',
     minHeight: '100vh',

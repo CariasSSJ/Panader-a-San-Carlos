@@ -1,5 +1,12 @@
 # Getting Started with Create React App
 
+## Autenticación del portal
+
+- Habilite el proveedor **Correo electrónico/Contraseña** en Firebase Authentication y cree allí las cuentas de empleados. El portal no permite registrarse públicamente.
+- Para que una cuenta conserve acceso a **Producción** y **Revisión de pedidos**, asígnele desde un entorno confiable con Firebase Admin SDK el custom claim `role: "gerencia"`. No asigne claims desde el cliente web. La gerencia debe cerrar sesión y volver a entrar para renovar el token.
+- La sesión de Firebase se conserva mientras dure la sesión del navegador y se solicita de nuevo al iniciar una sesión nueva.
+- Configure y publique Firestore Security Rules para exigir `request.auth != null` en las lecturas y escrituras. La protección de pantallas en React no sustituye las reglas de Firestore, que son las que protegen los datos directamente.
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { iniciarSesion } from '../services/authService';
+import { iniciarSesion, obtenerRolUsuario, cerrarSesion } from '../services/authService';
 import { ArrowRight, LockKeyhole, X } from 'lucide-react';
 
 export const LoginModal = ({ isOpen, onClose, onLoginExitoso }) => {
@@ -17,10 +17,15 @@ export const LoginModal = ({ isOpen, onClose, onLoginExitoso }) => {
 
     try {
       const user = await iniciarSesion(email, password);
+      if (await obtenerRolUsuario(user) !== 'gerencia') {
+        await cerrarSesion();
+        setError('Esta cuenta no tiene permisos de gerencia.');
+        return;
+      }
       onLoginExitoso(user);
       onClose();
     } catch (err) {
-      setError('Credenciales inválidas. Verifique su correo y contraseña.');
+      setError('No se pudo validar el acceso. Verifique sus credenciales e inténtelo de nuevo.');
     } finally {
       setCargando(false);
     }
