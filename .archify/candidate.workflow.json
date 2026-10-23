@@ -1,0 +1,216 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Panadería San Carlos — Flujo Operativo de Pedidos y Producción",
+    "output": "./workflow.html",
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "flujo_completo",
+        "label": "Flujo de Operación Integral",
+        "focus": [
+          "pedido_sucursal",
+          "registro_pedido",
+          "revision_gerencial",
+          "consolidado_insumos",
+          "descuento_stock",
+          "emision_remision"
+        ],
+        "note": "Ruta principal desde la solicitud en sucursal hasta el despacho y facturación."
+      },
+      {
+        "id": "control_gerencial",
+        "label": "Supervisión y Aprobación",
+        "focus": [
+          "revision_gerencial",
+          "pedido_rechazado",
+          "consolidado_insumos"
+        ],
+        "note": "Compuerta de seguridad donde gerencia autoriza o rechaza pedidos."
+      },
+      {
+        "id": "produccion_logistica",
+        "label": "Taller y Distribución",
+        "focus": [
+          "consolidado_insumos",
+          "descuento_stock",
+          "emision_remision",
+          "alertas_ruta"
+        ],
+        "note": "Explosión de materias primas, actualización de inventario y salida a ruta."
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "sucursales", "label": "Portal Sucursales" },
+    { "id": "supervision", "label": "Supervisión Gerencial" },
+    { "id": "produccion", "label": "Taller de Producción" },
+    { "id": "distribucion", "label": "Distribución y Remisión" }
+  ],
+  "phases": [
+    { "id": "fase_solicitud", "label": "1. Captura de Pedido", "fromCol": 0, "toCol": 1 },
+    { "id": "fase_revision", "label": "2. Control y Aprobación", "fromCol": 2, "toCol": 2, "variant": "emphasis" },
+    { "id": "fase_produccion", "label": "3. Explosión de Insumos", "fromCol": 3, "toCol": 3, "variant": "default" },
+    { "id": "fase_cierre", "label": "4. Despacho y Remisión", "fromCol": 4, "toCol": 4, "variant": "dashed" }
+  ],
+  "groups": [
+    { "id": "grupo_supervision", "label": "Filtro de integridad", "lane": "supervision", "fromCol": 2, "toCol": 3, "variant": "security" },
+    { "id": "grupo_produccion", "label": "Batch de panificación", "lane": "produccion", "fromCol": 3, "toCol": 4, "variant": "emphasis" },
+    { "id": "grupo_despacho", "label": "Entrega y auditoría", "lane": "distribucion", "fromCol": 3, "toCol": 4, "variant": "dashed" }
+  ],
+  "mainPath": [
+    "pedido_sucursal",
+    "registro_pedido",
+    "revision_gerencial",
+    "consolidado_insumos",
+    "descuento_stock",
+    "emision_remision"
+  ],
+  "nodes": [
+    {
+      "id": "pedido_sucursal",
+      "lane": "sucursales",
+      "col": 0,
+      "type": "frontend",
+      "label": "Solicitud Sucursal",
+      "sublabel": "Turno y 8 variedades",
+      "width": 120
+    },
+    {
+      "id": "registro_pedido",
+      "lane": "sucursales",
+      "col": 1,
+      "type": "database",
+      "label": "Registro Firestore",
+      "sublabel": "Colección pedidos",
+      "width": 124
+    },
+    {
+      "id": "revision_gerencial",
+      "lane": "supervision",
+      "col": 2,
+      "type": "security",
+      "label": "Revisión Gerencial",
+      "sublabel": "Validación y cupos",
+      "width": 124
+    },
+    {
+      "id": "pedido_rechazado",
+      "lane": "supervision",
+      "col": 3,
+      "type": "security",
+      "label": "Pedido Denegado",
+      "sublabel": "Eliminar de cola",
+      "width": 120
+    },
+    {
+      "id": "consolidado_insumos",
+      "lane": "produccion",
+      "col": 3,
+      "type": "backend",
+      "label": "Cálculo de Insumos",
+      "sublabel": "Consolidado y recetas",
+      "width": 124
+    },
+    {
+      "id": "descuento_stock",
+      "lane": "produccion",
+      "col": 4,
+      "type": "database",
+      "label": "Deducción Stock",
+      "sublabel": "Estado PROCESADO",
+      "width": 124
+    },
+    {
+      "id": "emision_remision",
+      "lane": "distribucion",
+      "col": 4,
+      "type": "frontend",
+      "label": "Remisión y Factura",
+      "sublabel": "jsPDF y entrega",
+      "width": 124
+    },
+    {
+      "id": "alertas_ruta",
+      "lane": "distribucion",
+      "col": 3,
+      "type": "messagebus",
+      "label": "Alertas de Ruta",
+      "sublabel": "Incidentes en reparto",
+      "width": 120
+    }
+  ],
+  "edges": [
+    {
+      "id": "envio_solicitud",
+      "from": "pedido_sucursal",
+      "to": "registro_pedido",
+      "label": "registrarPedido",
+      "variant": "default"
+    },
+    {
+      "id": "cola_revision",
+      "from": "registro_pedido",
+      "to": "revision_gerencial",
+      "label": "PENDIENTE",
+      "variant": "emphasis"
+    },
+    {
+      "id": "aprobacion_pedido",
+      "from": "revision_gerencial",
+      "to": "consolidado_insumos",
+      "label": "APROBADO",
+      "variant": "emphasis"
+    },
+    {
+      "id": "rechazo_pedido_edge",
+      "from": "revision_gerencial",
+      "to": "pedido_rechazado",
+      "label": "denegado",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "procesar_batch",
+      "from": "consolidado_insumos",
+      "to": "descuento_stock",
+      "label": "procesarProduccion",
+      "variant": "emphasis"
+    },
+    {
+      "id": "generar_factura",
+      "from": "descuento_stock",
+      "to": "emision_remision",
+      "label": "descargar PDF",
+      "variant": "emphasis",
+      "role": "return"
+    },
+    {
+      "id": "seguimiento_entrega",
+      "from": "alertas_ruta",
+      "to": "emision_remision",
+      "label": "confirmación",
+      "variant": "dashed",
+      "role": "branch"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Control y Trazabilidad",
+      "items": [
+        "Validación gerencial previa a producción"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Producción y Despacho",
+      "items": [
+        "Deducción de insumos y remisión en PDF"
+      ]
+    }
+  ]
+}

@@ -10,6 +10,7 @@ import { LoginEmpleado } from './components/LoginEmpleado';
 import { observarUsuario, cerrarSesion } from './services/authService';
 import { HistorialReportes } from './components/HistorialReportes';
 import { Escalabilidad } from './components/escalabilidad';
+import { GestionAlertas } from './components/GestionAlertas';
 import { BarChart3, ClipboardList, Factory, LockKeyhole, LogIn, LogOut, Package, ScrollText, ShieldCheck, TrendingUp } from 'lucide-react';
 
 function App() {
@@ -70,7 +71,8 @@ function App() {
   revision: 'REVISIÓN Y VALIDACIÓN DE PEDIDOS',
   admin: 'PANEL DE CONTROL DE PRODUCCIÓN',
   historial: 'HISTORIAL GENERAL & AUDITORÍA',
-  escalabilidad: 'ESCALABILIDAD Y RENDIMIENTO'
+  escalabilidad: 'ESCALABILIDAD Y RENDIMIENTO',
+  alertas: 'ALERTAS MÓVILES DE INCIDENTES EN RUTA'
   };  
 
   return (
@@ -141,6 +143,15 @@ function App() {
           <Factory size={16} /> Producción <span style={styles.adminBadge}>Gerencia</span>
         </button>
 
+        {/* BOTÓN NUEVO DEL MÓDULO DE ALERTAS */}
+          <button
+            onClick={() => handleSeleccionarVista('alertas')}
+            style={styles.navBtn(vista === 'alertas')}
+            
+          >
+            <TrendingUp size={16} /> Alertas Ruta
+          </button>
+
         <button
           onClick={() => handleSeleccionarVista('historial')}
           style={styles.navBtn(vista === 'historial')}
@@ -184,6 +195,7 @@ function App() {
           </div>
         )
       )}
+      {vista === 'alertas' && <GestionAlertas />}
       {vista === 'historial' && <HistorialReportes />}
       {vista === 'escalabilidad' && <Escalabilidad />}
     </main>

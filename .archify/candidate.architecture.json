@@ -1,0 +1,242 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Panadería San Carlos - Arquitectura del Sistema",
+    "quality_profile": "showcase",
+    "viewBox": [1146, 572],
+    "views": [
+      {
+        "id": "flujo-operativo",
+        "label": "Flujo Operativo de Pedidos y Producción",
+        "focus": ["empleados", "app_router", "pedidos_ui", "produccion_ui", "servicios", "firestore"],
+        "note": "Ciclo de pedidos desde sucursales, revisión, consolidación y producción en hornos."
+      },
+      {
+        "id": "transacciones-acid",
+        "label": "Servicios e Inventario Transaccional",
+        "focus": ["inventario_ui", "servicios", "firestore"],
+        "note": "Control atómico de insumos con runTransaction y alertas de stock mínimo."
+      },
+      {
+        "id": "autenticacion-rbac",
+        "label": "Seguridad y Control Gerencial",
+        "focus": ["gerencia", "auth_module", "auth_service", "fb_auth"],
+        "note": "Autenticación para gerencia con Firebase Auth y control de vistas protegidas."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "empleados",
+      "type": "external",
+      "label": "Sucursales",
+      "sublabel": "Pedidos Diarios",
+      "pos": [40, 180],
+      "size": [120, 60]
+    },
+    {
+      "id": "gerencia",
+      "type": "external",
+      "label": "Gerencia",
+      "sublabel": "Admin & Supervisión",
+      "pos": [40, 420],
+      "size": [120, 60]
+    },
+    {
+      "id": "app_router",
+      "type": "frontend",
+      "label": "React SPA",
+      "sublabel": "App.js Modular",
+      "brand": "react",
+      "pos": [260, 180],
+      "size": [130, 60]
+    },
+    {
+      "id": "auth_module",
+      "type": "security",
+      "label": "LoginModal",
+      "sublabel": "Control de Acceso",
+      "tag": "Vistas Protegidas",
+      "pos": [260, 420],
+      "size": [130, 60]
+    },
+    {
+      "id": "pedidos_ui",
+      "type": "frontend",
+      "label": "Portal Pedidos",
+      "sublabel": "PedidoSucursal.jsx",
+      "pos": [490, 80],
+      "size": [140, 60]
+    },
+    {
+      "id": "produccion_ui",
+      "type": "frontend",
+      "label": "Panel Producción",
+      "sublabel": "Revisión & Hornos",
+      "pos": [490, 180],
+      "size": [140, 60]
+    },
+    {
+      "id": "inventario_ui",
+      "type": "frontend",
+      "label": "Stock & Reportes",
+      "sublabel": "Insumos & Facturas",
+      "pos": [490, 280],
+      "size": [140, 60]
+    },
+    {
+      "id": "servicios",
+      "type": "backend",
+      "label": "Servicios App",
+      "sublabel": "pedidos & recetas",
+      "tag": "ACID Engine",
+      "pos": [730, 180],
+      "size": [140, 64]
+    },
+    {
+      "id": "auth_service",
+      "type": "security",
+      "label": "authService",
+      "sublabel": "firebase/auth SDK",
+      "pos": [730, 420],
+      "size": [140, 60]
+    },
+    {
+      "id": "firestore",
+      "type": "database",
+      "label": "Cloud Firestore",
+      "sublabel": "NoSQL Database",
+      "brand": "firebase",
+      "pos": [960, 180],
+      "size": [130, 64]
+    },
+    {
+      "id": "fb_auth",
+      "type": "cloud",
+      "label": "Firebase Auth",
+      "sublabel": "Identity Platform",
+      "brand": "firebase",
+      "pos": [960, 420],
+      "size": [130, 64]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "security-group",
+      "label": "Cliente Web (React 19 SPA)",
+      "wraps": [
+        "app_router",
+        "auth_module",
+        "pedidos_ui",
+        "produccion_ui",
+        "inventario_ui",
+        "servicios",
+        "auth_service"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Google Cloud / Firebase",
+      "wraps": [
+        "firestore",
+        "fb_auth"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "from": "empleados",
+      "to": "app_router",
+      "label": "Acceso Web",
+      "variant": "default"
+    },
+    {
+      "from": "gerencia",
+      "to": "auth_module",
+      "label": "Credenciales",
+      "variant": "security"
+    },
+    {
+      "from": "auth_module",
+      "to": "auth_service",
+      "label": "iniciarSesion",
+      "variant": "security"
+    },
+    {
+      "from": "auth_service",
+      "to": "fb_auth",
+      "label": "Auth Token",
+      "variant": "security"
+    },
+    {
+      "from": "app_router",
+      "to": "pedidos_ui",
+      "variant": "default"
+    },
+    {
+      "from": "app_router",
+      "to": "produccion_ui",
+      "variant": "default"
+    },
+    {
+      "from": "app_router",
+      "to": "inventario_ui",
+      "variant": "default"
+    },
+    {
+      "from": "pedidos_ui",
+      "to": "servicios",
+      "label": "registrarPedido",
+      "variant": "default"
+    },
+    {
+      "from": "produccion_ui",
+      "to": "servicios",
+      "label": "procesarProduccion",
+      "variant": "emphasis",
+      "labelDy": 14
+    },
+    {
+      "from": "inventario_ui",
+      "to": "servicios",
+      "label": "actualizarStock",
+      "variant": "default"
+    },
+    {
+      "from": "servicios",
+      "to": "firestore",
+      "label": "runTransaction",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Portal Frontend",
+      "items": [
+        "React 19 SPA con arquitectura modular por vistas",
+        "Control de sesión gerencial y protección de rutas administrativas",
+        "Generación e impresión de facturas PDF en cliente con jsPDF y Autotable"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Motor Transaccional",
+      "items": [
+        "Procesamiento ACID con runTransaction en Cloud Firestore",
+        "Verificación obligatoria de stock antes de confirmar órdenes de producción",
+        "Disparo de alertas automáticas en colección alertas_stock ante quiebres"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Infraestructura Serverless",
+      "items": [
+        "Firebase Authentication para gestión segura de credenciales gerenciales",
+        "Cloud Firestore como base de datos en tiempo real multisede",
+        "Historial inmutable de despachos y auditoría de consumos"
+      ]
+    }
+  ]
+}
