@@ -106,7 +106,7 @@ export const inicializarInsumosYRecetas = async () => {
       productoId: "frances",
       ingredientes: [
         { insumoId: "harina_fuerza", cantidad: 0.12 },
-        { insumoId: "azucar", cantidad: 0.1 },
+        { insumoId: "azucar", cantidad: 0.2 },
         { insumoId: "levadura", cantidad: 0.5 }
       ]
     },
@@ -149,7 +149,7 @@ export const inicializarInsumosYRecetas = async () => {
       ingredientes: [
         { insumoId: "harina_suave", cantidad: 0.10 },
         { insumoId: "azucar", cantidad: 0.3 },
-        { insumoId: "huevo", cantidad: 0.1 }
+        { insumoId: "huevo", cantidad: 0.2 }
       ]
     },
     {
