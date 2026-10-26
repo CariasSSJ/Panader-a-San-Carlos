@@ -1,11 +1,7 @@
 import { collection, query, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../config/firebase'; // Ajusta la ruta a tu archivo firebaseConfig si es necesario
+import { db } from '../config/firebase'; 
 
-/**
- * Escucha las alertas en tiempo real desde Firestore
- * @param {Function} callback - Función que recibe el listado actualizado de incidentes
- * @returns {Function} Unsubscribe - Función para cancelar la suscripción
- */
+
 export const suscribirAlertasRuta = (callback, onError) => {
   const q = query(
     collection(db, 'incidentes_ruta'),
@@ -41,10 +37,7 @@ export const suscribirAlertasRuta = (callback, onError) => {
   );
 };
 
-/**
- * Actualiza el estado de una alerta a "RESUELTA"
- * @param {string} idIncidente - ID del documento en Firestore
- */
+
 export const marcarAlertaResuelta = async (idIncidente) => {
   try {
     const docRef = doc(db, 'incidentes_ruta', idIncidente);
