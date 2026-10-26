@@ -30,7 +30,7 @@ export const PanelProduccion = () => {
   const [listoParaProcesar, setListoParaProcesar] = useState(false);
   const [mensaje, setMensaje] = useState({ tipo: '', texto: '' });
 
-  // 1. Cargar pedidos con filtro por Sucursal, Fecha y Turno (solo APROBADOS)
+ 
   const cargarPedidosFiltro = async () => {
     setCargando(true);
     setMensaje({ tipo: '', texto: '' });
@@ -39,12 +39,12 @@ export const PanelProduccion = () => {
     setTotalesInsumos({});
 
     try {
-      // Consultamos los pedidos APROBADOS de la fecha y turno indicados
+      
       const q = query(
         collection(db, "pedidos"),
         where("fecha", "==", fecha),
         where("turno", "==", turno),
-        where("estado", "==", "APROBADO")  // ✅ Solo mostrar pedidos aprobados
+        where("estado", "==", "APROBADO")  
       );
 
       const querySnapshot = await getDocs(q);
@@ -54,14 +54,14 @@ export const PanelProduccion = () => {
         listaPedidos.push({ id: docSnap.id, ...docSnap.data() });
       });
 
-      // Si el filtro no es 'TODAS', filtramos los resultados localmente
+      
       if (sucursalFiltro !== 'TODAS') {
         listaPedidos = listaPedidos.filter((p) => {
           if (!p.sucursal) return false;
           const sucPedido = p.sucursal.toLowerCase().trim();
           const sucFiltro = sucursalFiltro.toLowerCase().trim();
           
-          // Compara si coincide el ID corto (ej: "chiva") o el nombre largo (ej: "Sucursal Chiva")
+          
           return sucPedido === sucFiltro || 
                  sucPedido.includes(sucFiltro) || 
                  sucFiltro.includes(sucPedido);
@@ -80,7 +80,7 @@ export const PanelProduccion = () => {
     cargarPedidosFiltro();
   }, [fecha, turno, sucursalFiltro]);
 
-  // 2. Calcular Consolidado de Panes, Totales Monetarios e Insumos
+  
   const handleCalcularConsolidado = async () => {
     if (pedidos.length === 0) {
       setMensaje({ tipo: 'error', texto: 'No hay pedidos registrados para el filtro seleccionado.' });
@@ -90,7 +90,7 @@ export const PanelProduccion = () => {
     try {
       setCargando(true);
 
-      // Consolidar total de panes
+      
       const acumuladoPan = {};
       pedidos.forEach(ped => {
         ped.items?.forEach(item => {
@@ -99,13 +99,13 @@ export const PanelProduccion = () => {
       });
       setTotalesPan(acumuladoPan);
 
-      // Consultar recetas e insumos
+      
       const recetas = await obtenerRecetas();
       const insumosCat = await obtenerInsumos();
       const mapInsumos = {};
       insumosCat.forEach(i => { mapInsumos[i.id] = i; });
 
-      // Calcular insumos necesarios
+      
       const acumuladoInsumos = {};
       const listaRequerida = [];
 
@@ -145,7 +145,7 @@ export const PanelProduccion = () => {
     }
   };
 
- // 3. Procesar, descontar del stock, cambiar estado y generar PDF
+ 
   const handleProcesarYDescontar = async () => {
   if (sucursalFiltro === 'TODAS') {
     setMensaje({
@@ -158,18 +158,18 @@ export const PanelProduccion = () => {
   try {
     setProcesando(true);
 
-    // PASO CLAVE: Enviar el objeto completo estructurado
+    
     await procesarProduccion({
       sucursal: sucursalFiltro,
       fecha,
       turno,
-      pedidos,               // <-- Pasa los pedidos cargados
+      pedidos,               
       insumosAProcesar: materiaPrimaRequerida,
-      totalesPan,            // <-- Pasa el detalle de panes para el cálculo de Q y PDF
+      totalesPan,            
       totalesInsumos
     });
 
-    // Generar Factura / Remisión en PDF
+    
     generarFacturaPDF({
       sucursal: sucursalFiltro,
       fecha,
@@ -186,7 +186,7 @@ export const PanelProduccion = () => {
 
     setListoParaProcesar(false);
     
-    // REFRESCAR PANTALLA: Carga los pedidos actualizados de Firestore
+    
     await cargarPedidosFiltro();
 
   } catch (error) {
@@ -196,7 +196,7 @@ export const PanelProduccion = () => {
   }
 };
 
-  // Calcular Gran Total Monetario en pantalla
+  
   const granTotalMonetario = Object.entries(totalesPan).reduce((acc, [prodId, cant]) => {
     const p = PRECIOS_PANES[prodId] || 1.00;
     return acc + (cant * p);
