@@ -8,19 +8,18 @@ import {
 } from "firebase/firestore";
 import { PRECIOS_PANES } from "../utils/facturaPdf";
 
-// 1. Registrar pedido de sucursal (PENDIENTE_REVISION para ser verificado primero)
 export const registrarPedido = async (sucursal, fecha, turno, items) => {
   return await addDoc(collection(db, "pedidos"), {
     sucursal,
     fecha,
-    turno, // "Mañana" o "Tarde"
-    items,  // [{ productoId: "frances", cantidad: 80 }]
-    estado: "PENDIENTE_REVISION",  // Debe ser revisado antes
+    turno, 
+    items,  
+    estado: "PENDIENTE_REVISION",  
     createdAt: serverTimestamp()
   });
 };
 
-// 1.5 Actualizar un pedido (para revisión/edición)
+
 export const actualizarPedido = async (pedidoId, datosActualizados) => {
   const pedidoRef = doc(db, "pedidos", pedidoId);
   return await runTransaction(db, async (transaction) => {
@@ -34,7 +33,7 @@ export const actualizarPedido = async (pedidoId, datosActualizados) => {
   });
 };
 
-// 1.6 Eliminar un pedido (para rechazar)
+
 export const eliminarPedido = async (pedidoId) => {
   const pedidoRef = doc(db, "pedidos", pedidoId);
   return await runTransaction(db, async (transaction) => {
@@ -43,7 +42,7 @@ export const eliminarPedido = async (pedidoId) => {
       throw new Error(`El pedido ${pedidoId} no existe.`);
     }
 
-    // Cambiar estado a RECHAZADO en lugar de eliminar
+   
     transaction.update(pedidoRef, {
       estado: "RECHAZADO",
       fechaRechazo: serverTimestamp()
@@ -52,7 +51,7 @@ export const eliminarPedido = async (pedidoId) => {
   });
 };
 
-// 1.7 Aprobar un pedido (cambiar a APROBADO)
+
 export const aprobarPedido = async (pedidoId) => {
   const pedidoRef = doc(db, "pedidos", pedidoId);
   return await runTransaction(db, async (transaction) => {
@@ -69,7 +68,7 @@ export const aprobarPedido = async (pedidoId) => {
   });
 };
 
-// 2. Procesar producción con CONTROL TRANSACCIONAL Y REGISTRO DE HISTORIAL
+
 export const procesarProduccion = async ({
   sucursal = "CENTRAL",
   fecha = new Date().toISOString().split('T')[0],
@@ -79,7 +78,7 @@ export const procesarProduccion = async ({
   totalesPan = {},
   totalesInsumos = {}
 }) => {
-  // VALIDACIÓN DE ENTRADA
+  
   if (!pedidos || pedidos.length === 0) {
     throw new Error("No hay pedidos para procesar");
   }
@@ -92,12 +91,10 @@ export const procesarProduccion = async ({
   console.log("🔵 Iniciando procesarProduccion con pedidos:", pedidosConId.map(p => p.id));
 
   try {
-    // 1. FASE TRANSACCIONAL
+    
     await runTransaction(db, async (transaction) => {
       
-      // FASE 1: TODAS LAS LECTURAS (Reads)
       
-      // Read 1: Insumos
       const lecturasInsumos = [];
       for (const item of insumosAProcesar) {
         const insumoRef = doc(db, "insumos", item.insumoId);
@@ -127,7 +124,7 @@ export const procesarProduccion = async ({
         });
       }
 
-      // Read 2: Pedidos (Lectura previa requerida en transacciones de Firestore)
+      
       const refsPedidos = [];
       for (const p of pedidosConId) {
         const pedidoRef = doc(db, "pedidos", p.id);
@@ -142,17 +139,14 @@ export const procesarProduccion = async ({
 
       console.log("📝 Pedidos a actualizar:", refsPedidos.length);
 
-      // FASE 2: TODAS LAS ESCRITURAS (Writes)
       
-      // Write 1: Actualizar Stock
-      // Dentro de procesarProduccion (escrituras de la transacción):
       for (const itemActualizar of lecturasInsumos) {
         transaction.update(itemActualizar.ref, { 
           stockActual: itemActualizar.nuevoStock,
           ultimaSalidaProduccion: serverTimestamp()
         });
 
-        // VERIFICACIÓN DE STOCK MÍNIMO PARA KEVIN
+        
         if (itemActualizar.nuevoStock < itemActualizar.stockMinimo) {
           const alertaRef = doc(collection(db, "alertas_stock"));
           transaction.set(alertaRef, {
@@ -167,7 +161,7 @@ export const procesarProduccion = async ({
         }
       }
 
-      // Write 2: Cambiar estado del pedido a PROCESADO
+      
       if (refsPedidos.length > 0) {
         for (const pRef of refsPedidos) {
           transaction.update(pRef, {
@@ -181,7 +175,7 @@ export const procesarProduccion = async ({
       }
     });
 
-    // 2. FASE POST-TRANSACCIÓN: REGISTRAR EN HISTORIAL
+    
     let totalMontoQ = 0;
     if (totalesPan && Object.keys(totalesPan).length > 0) {
       Object.entries(totalesPan).forEach(([prodId, cant]) => {
