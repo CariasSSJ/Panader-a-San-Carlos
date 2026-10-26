@@ -14,13 +14,13 @@ import { GestionAlertas } from './components/GestionAlertas';
 import { BarChart3, ClipboardList, Factory, LockKeyhole, LogIn, LogOut, Package, ScrollText, ShieldCheck, TrendingUp } from 'lucide-react';
 
 function App() {
-  const [vista, setVista] = useState('sucursal'); // 'sucursal', 'inventario', 'recetas', 'revision', 'admin', 'historial', 'escalabilidad'
+  const [vista, setVista] = useState('sucursal'); 
   const [usuario, setUsuario] = useState(null);
   const [rolUsuario, setRolUsuario] = useState(null);
   const [authReady, setAuthReady] = useState(false);
   const [modalLoginOpen, setModalLoginOpen] = useState(false);
 
-  // Escuchar estado de sesión de Firebase Auth
+  
   useEffect(() => {
     const desubscribir = observarUsuario((session) => {
       setUsuario(session?.user ?? null);
@@ -31,7 +31,7 @@ function App() {
   }, []);
 
   const handleSeleccionarVista = (nuevaVista) => {
-    // Solicitar credenciales gerenciales sin cambiar la vista actual.
+    
     if ((nuevaVista === 'admin' || nuevaVista === 'revision') && rolUsuario !== 'gerencia') {
       setModalLoginOpen(true);
       return;
