@@ -1,7 +1,7 @@
 import { db } from "../config/firebase";
 import { doc, setDoc, getDoc, collection, getDocs, updateDoc, increment } from "firebase/firestore";
 
-// 1. Obtener todos los insumos en stock
+
 export const obtenerInsumos = async () => {
   const snapshot = await getDocs(collection(db, "insumos"));
   const insumos = [];
@@ -11,7 +11,7 @@ export const obtenerInsumos = async () => {
   return insumos;
 };
 
-// 2. Registrar/Ingresar stock de un proveedor X (Suma al stock actual)
+
 export const agregarStockInsumo = async (insumoId, nombreInsumo, unidad, cantidadIngresada, proveedor) => {
   const insumoRef = doc(db, "insumos", insumoId);
   const insumoSnap = await getDoc(insumoRef);
@@ -33,7 +33,7 @@ export const agregarStockInsumo = async (insumoId, nombreInsumo, unidad, cantida
   }
 };
 
-// 3. Obtener todas las recetas asociadas a los panes
+
 export const obtenerRecetas = async () => {
   const snapshot = await getDocs(collection(db, "recetas"));
   const recetas = {};
@@ -43,17 +43,17 @@ export const obtenerRecetas = async () => {
   return recetas;
 };
 
-// 4. Guardar / Modificar la receta de un tipo de pan específico
+
 export const guardarRecetaProducto = async (productoId, ingredientes) => {
   const recetaRef = doc(db, "recetas", productoId);
   await setDoc(recetaRef, {
     productoId,
-    ingredientes, // Array de { insumoId, cantidad }
+    ingredientes, 
     updatedAt: new Date()
   });
 };
 
-// 5. Inicializar Insumos y TODAS las Recetas por Defecto en Firestore
+
 const normalizarCantidadesRecetas = async () => {
   const snapshot = await getDocs(collection(db, "recetas"));
 
@@ -81,7 +81,7 @@ const normalizarCantidadesRecetas = async () => {
 };
 
 export const inicializarInsumosYRecetas = async () => {
-  // A. LISTA DE INSUMOS BASE
+  
   const INSUMOS_BASE = [
     { id: "harina_fuerza", nombre: "Harina de fuerza", unidad: "lbs", stockActual: 1000, ultimoProveedor: "Molinos Modernos" },
     { id: "harina_suave", nombre: "Harina suave", unidad: "lbs", stockActual: 800, ultimoProveedor: "Molinos Modernos" },
@@ -100,7 +100,7 @@ export const inicializarInsumosYRecetas = async () => {
     }
   }
 
-  // B. RECETAS POR DEFECTO PARA CADA PRODUCTO (Cantidad por 1 unidad de pan)
+  
   const RECETAS_BASE = [
     {
       productoId: "frances",
