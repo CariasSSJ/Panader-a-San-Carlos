@@ -11,7 +11,7 @@ import { app } from "../config/firebase";
 
 export const auth = getAuth(app);
 
-// 1. Iniciar sesión con Email y Contraseña
+
 export const iniciarSesion = async (email, password) => {
   await setPersistence(auth, browserSessionPersistence);
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -23,12 +23,12 @@ export const obtenerRolUsuario = async (user) => {
   return token.claims.role === 'gerencia' ? 'gerencia' : 'empleado';
 };
 
-// 2. Cerrar sesión
+
 export const cerrarSesion = async () => {
   await signOut(auth);
 };
 
-// 3. Escuchar cambios de estado de autenticación
+
 export const observarUsuario = (callback) => {
   return onAuthStateChanged(auth, async (user) => {
     if (!user) {
